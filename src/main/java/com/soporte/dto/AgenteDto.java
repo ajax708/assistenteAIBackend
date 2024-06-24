@@ -7,4 +7,6 @@ import lombok.Data;
 public class AgenteDto {
     private Integer id;
     private String tipo;
+    private String nombre;
+    private String email;
 }

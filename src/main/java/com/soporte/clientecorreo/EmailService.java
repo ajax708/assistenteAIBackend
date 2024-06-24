@@ -1,5 +1,6 @@
 package com.soporte.clientecorreo;
 
+
 import jakarta.annotation.PostConstruct;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Properties;
 
+
 @Service
 public class EmailService {
 
@@ -17,7 +19,7 @@ public class EmailService {
     private String host;
 
     @Value("${spring.mail.port}")
-    private int port;
+    private String port;
 
     @Value("${spring.mail.username}")
     private String username;
@@ -27,10 +29,8 @@ public class EmailService {
 
     @Value("${spring.mail.smtp.auth}")
     private String smptAuth;
-
     @Value("${spring.mail.smtp.starttls.enable}")
     private String starttls;
-
     @Value("${spring.mail.imap.ssl.enable}")
     private String ssl;
 
@@ -86,6 +86,7 @@ public class EmailService {
     }
 
     public void sendEmail(String to, String subject, String content) {
+
         Properties prop = new Properties();
         prop.put("mail.smtp.host", host);
         prop.put("mail.smtp.port", port);
