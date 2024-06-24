@@ -50,17 +50,44 @@ public class ClientCorreo {
                     String senderEmail = Arrays.stream(message.getFrom())
                             .map(Address::toString)
                             .findFirst()
+                            .map(this::extractEmail)
                             .orElse(null);
 
-                    /*if (senderEmail != null) {
+                    if (senderEmail != null) {
+                        //registrar correo
                         EmpleadoDto empleadoDto = empleadoService.readByCorreo(senderEmail);
+                        if(empleadoDto == null) {
+                            System.out.println("No se encontró empleado con correo: " + senderEmail);
+                            //Marca correo como cliente no registrado
+                            return;
+                        }
                         EmpresaDto empresaDto = empleadoDto.getEmpresa();
+                        //SI empresaDto == null marcar como NO TIENE EMPRESA
+                        if(empresaDto == null) {
+                            System.out.println("No se encontró empresa para el empleado con correo: " + senderEmail);
+                            //Marca correo como cliente sin empresa
+                            return;
+                        }
                         ProductoDto productoDto = new ProductoDto();
+                        //si productoDto == null marcar como NO TIENE PRODUCTO
+                        if (productoDto == null) {
+                            System.out.println("No se encontró producto para la empresa: " + empresaDto.getRazonSocial());
+                            //Marca correo como empresa sin producto
+                            return;
+                        }
                         productoDto.setId(1);
+
                         SoporteDto soporteDto = soporteService.readByEmpresaAndProducto(empresaDto, productoDto);
+                        //si soporteDto == null marcar como NO TIENE SOPORTE
+                        if(soporteDto == null) {
+                            System.out.println("No se encontró soporte para la empresa: " + empresaDto.getRazonSocial());
+                            //Marca correo como empresa sin soporte
+                            return;
+                        }
+
 
                         // Procesa el soporteDto según sea necesario
-                    }*/
+                    }
                 } catch (MessagingException e) {
                     e.printStackTrace();
                 } catch (Exception e) {
@@ -83,7 +110,16 @@ public class ClientCorreo {
             }
         }
     }
-
+    private String extractEmail(String fullAddress) {
+        int startIndex = fullAddress.lastIndexOf('<');
+        int endIndex = fullAddress.lastIndexOf('>');
+        if (startIndex >= 0 && endIndex > startIndex) {
+            return fullAddress.substring(startIndex + 1, endIndex);
+        } else {
+            // Si no encuentra los caracteres < >, asume que toda la cadena es el correo
+            return fullAddress.trim();
+        }
+    }
     public void sendEmail(String to, String subject, String content) {
         final String username = "your-email@gmail.com";
         final String password = "your-password";

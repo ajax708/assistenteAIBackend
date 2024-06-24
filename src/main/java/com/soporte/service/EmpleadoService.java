@@ -44,6 +44,11 @@ public class EmpleadoService {
 
     public EmpleadoDto readByCorreo(String email) throws Exception {
         Empleado empleado= empleadoRepo.findByCorreo(email);
+        if(empleado==null){
+            System.out.println("NO EXIST:" + email);
+            //throw new ModelNotFoundException("NO EXIST:" + email);
+            return null;
+        }
         EmpleadoDto empleadoDto=modelMapper.map(empleado, EmpleadoDto.class);
         return empleadoDto;
     }
