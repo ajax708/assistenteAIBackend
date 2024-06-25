@@ -2,9 +2,11 @@ package com.soporte.dto;
 
 
 
+import lombok.Data;
+
 import java.time.LocalDate;
 
-
+@Data
 public class SoporteDto {
 
     private Integer id;

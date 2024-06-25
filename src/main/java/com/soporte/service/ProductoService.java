@@ -24,6 +24,11 @@ public class ProductoService {
         return dto;
     }
 
+    public ProductoDto findProductosByNombre(String nombre){
+        Producto model= repo.findProductosByNombre(nombre);
+        return mapper.map(model,ProductoDto.class);
+    }
+
     public ProductoDto update(String session, ProductoDto dto) throws Exception {
         Producto model=mapper.map(dto,Producto.class);
         model= repo.save(model);

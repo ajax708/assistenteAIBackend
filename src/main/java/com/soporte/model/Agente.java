@@ -13,4 +13,6 @@ public class Agente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String tipo;
+    private String nombre;
+    private String email;
 }

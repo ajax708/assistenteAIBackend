@@ -7,6 +7,8 @@ import com.soporte.dto.EmpresaDto;
 import com.soporte.dto.ProductoDto;
 import com.soporte.dto.SoporteDto;
 import com.soporte.service.EmpleadoService;
+import com.soporte.service.OpenAIService;
+import com.soporte.service.ProductoService;
 import com.soporte.service.SoporteService;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Component
 @RequiredArgsConstructor
@@ -26,22 +29,26 @@ public class ClientCorreo {
     private final EmailService emailService;
     private final EmpleadoService empleadoService;
     private final SoporteService soporteService;
+    private final ProductoService productoService;
+    private final OpenAIService openAIService;
 
 
     @Scheduled(fixedRate = 60000)
     public void getCorreoNoLeidos() {
+        AtomicReference<String> respuesta = new AtomicReference<>("");
+
         try {
             emailService.processUnreadMessages(message -> {
                 try {
                     System.out.println("Email Subject: " + message.getSubject());
-
+                    String subject = message.getSubject();
                     Object content = message.getContent();
                     if (content instanceof String) {
-                        // Contenido simple de texto
                         System.out.println("Email Content: " + content);
                     } else if (content instanceof Multipart) {
-                        // Contenido multiparte
                         Multipart multipart = (Multipart) content;
+                        String multipartContent = convertMultipartToString(multipart);
+                        content = multipartContent;
                         printMultipart(multipart);
                     } else {
                         System.out.println("Email Content: " + content.toString());
@@ -68,25 +75,31 @@ public class ClientCorreo {
                             //Marca correo como cliente sin empresa
                             return;
                         }
-                        ProductoDto productoDto = new ProductoDto();
+
+                        ProductoDto productoDto = productoService.findProductosByNombre(subject);
                         //si productoDto == null marcar como NO TIENE PRODUCTO
                         if (productoDto == null) {
-                            System.out.println("No se encontró producto para la empresa: " + empresaDto.getRazonSocial());
-                            //Marca correo como empresa sin producto
+                            System.out.println("No se encontro el producto");
                             return;
                         }
-                        productoDto.setId(1);
 
                         SoporteDto soporteDto = soporteService.readByEmpresaAndProducto(empresaDto, productoDto);
                         //si soporteDto == null marcar como NO TIENE SOPORTE
+
                         if(soporteDto == null) {
                             System.out.println("No se encontró soporte para la empresa: " + empresaDto.getRazonSocial());
                             //Marca correo como empresa sin soporte
                             return;
                         }
+                        if(soporteDto.getEstado()){
+                            respuesta.set(openAIService.chatGptIa(content.toString()));
 
+                            System.out.println(respuesta.get());
+                        }
+                       /* if (!respuesta.get().isEmpty()){
+                            sendSimpleMessage(senderEmail,"Soporte Tesabiz",respuesta.get());
+                        }*/
 
-                        // Procesa el soporteDto según sea necesario
                     }
                 } catch (MessagingException e) {
                     e.printStackTrace();
@@ -155,6 +168,31 @@ public class ClientCorreo {
         } catch (MessagingException e) {
             e.printStackTrace();
         }
+    }
+
+   /* public void sendSimpleMessage(String to, String subject, String text) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("luisbryancuevaparada@gmail.com");
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(text);
+        emailSender.send(message);
+    }
+*/
+    private String convertMultipartToString(Multipart multipart) throws MessagingException, IOException {
+        StringBuilder result = new StringBuilder();
+        int count = multipart.getCount();
+        for (int i = 0; i < count; i++) {
+            BodyPart bodyPart = multipart.getBodyPart(i);
+            if (bodyPart.isMimeType("text/plain")) {
+                result.append(bodyPart.getContent().toString());
+            } else if (bodyPart.isMimeType("text/html")) {
+                result.append(bodyPart.getContent().toString());
+            } else if (bodyPart.getContent() instanceof Multipart) {
+                result.append(convertMultipartToString((Multipart) bodyPart.getContent()));
+            }
+        }
+        return result.toString();
     }
 
 }

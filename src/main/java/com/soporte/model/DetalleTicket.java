@@ -1,8 +1,10 @@
 package com.soporte.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
+@Data
 public class DetalleTicket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
