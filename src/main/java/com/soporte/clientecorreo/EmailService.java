@@ -15,17 +15,24 @@ import java.util.Properties;
 @Service
 public class EmailService {
 
-    @Value("${spring.mail.host}")
-    private String host;
+    @Value("${spring.mail.imap.host}")
+    private String hostImap;
 
-    @Value("${spring.mail.port}")
-    private String port;
+    @Value("${spring.mail.imap.port}")
+    private String portImap;
 
     @Value("${spring.mail.username}")
     private String username;
 
     @Value("${spring.mail.password}")
     private String password;
+
+    @Value("${spring.mail.host}")
+    private String hostSmtp;
+
+    @Value("${spring.mail.port}")
+    private String portSmtp;
+
 
     @Value("${spring.mail.smtp.auth}")
     private String smptAuth;
@@ -47,8 +54,8 @@ public class EmailService {
 
     private void connectToStore() throws MessagingException {
         Properties properties = new Properties();
-        properties.put("mail.imap.host", host);
-        properties.put("mail.imap.port", port);
+        properties.put("mail.imap.host", hostImap);
+        properties.put("mail.imap.port", portImap);
         properties.put("mail.imap.ssl.enable", ssl);
         properties.put("mail.store.protocol", "imap");
 
@@ -88,8 +95,8 @@ public class EmailService {
     public void sendEmail(String to, String subject, String content) {
 
         Properties prop = new Properties();
-        prop.put("mail.smtp.host", host);
-        prop.put("mail.smtp.port", port);
+        prop.put("mail.smtp.host", hostSmtp);
+        prop.put("mail.smtp.port", portSmtp);
         prop.put("mail.smtp.auth", smptAuth);
         prop.put("mail.smtp.starttls.enable", starttls);
 

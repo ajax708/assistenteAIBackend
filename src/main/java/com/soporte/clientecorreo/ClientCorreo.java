@@ -2,14 +2,8 @@ package com.soporte.clientecorreo;
 
 
 
-import com.soporte.dto.EmpleadoDto;
-import com.soporte.dto.EmpresaDto;
-import com.soporte.dto.ProductoDto;
-import com.soporte.dto.SoporteDto;
-import com.soporte.service.EmpleadoService;
-import com.soporte.service.OpenAIService;
-import com.soporte.service.ProductoService;
-import com.soporte.service.SoporteService;
+import com.soporte.dto.*;
+import com.soporte.service.*;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
@@ -31,6 +25,8 @@ public class ClientCorreo {
     private final SoporteService soporteService;
     private final ProductoService productoService;
     private final OpenAIService openAIService;
+    private final TicketService ticketService;
+
 
 
     @Scheduled(fixedRate = 60000)
@@ -92,9 +88,12 @@ public class ClientCorreo {
                             return;
                         }
                         if(soporteDto.getEstado()){
+                            TicketDto ticketDto =this.createTicket(empleadoDto,soporteDto,subject);
                             respuesta.set(openAIService.chatGptIa(content.toString()));
+                            String correoRespuesta=respuesta.get();
+                            System.out.println(correoRespuesta);
+                            emailService.sendEmail(senderEmail,subject,correoRespuesta);
 
-                            System.out.println(respuesta.get());
                         }
                        /* if (!respuesta.get().isEmpty()){
                             sendSimpleMessage(senderEmail,"Soporte Tesabiz",respuesta.get());
@@ -133,10 +132,9 @@ public class ClientCorreo {
             return fullAddress.trim();
         }
     }
-    public void sendEmail(String to, String subject, String content) {
-        final String username = "your-email@gmail.com";
-        final String password = "your-password";
 
+    /*
+    public void sendEmail(String to, String subject, String content) {
         Properties prop = new Properties();
         prop.put("mail.smtp.host", "smtp.gmail.com");
         prop.put("mail.smtp.port", "587");
@@ -169,7 +167,7 @@ public class ClientCorreo {
             e.printStackTrace();
         }
     }
-
+*/
    /* public void sendSimpleMessage(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("luisbryancuevaparada@gmail.com");
@@ -195,4 +193,23 @@ public class ClientCorreo {
         return result.toString();
     }
 
+    private TicketDto createTicket(EmpleadoDto empleadoDto,SoporteDto soporteDto,String asunto){
+        try{
+            TicketDto ticketDto=new TicketDto();
+            ticketDto.setAsunto(asunto);
+            ticketDto.setDescripcion("descripcion");
+            ticketDto.setEstado("ABIERTO");
+            ticketDto.setSolicitante(empleadoDto);
+            AgenteDto agenteDto=new AgenteDto();
+            agenteDto.setId(1);
+            ticketDto.setResponsable(agenteDto);
+            ticketDto.setSoporte(soporteDto);
+            ticketDto=ticketService.create("",ticketDto);
+            return ticketDto;
+        }catch (Exception e){
+            System.out.println(e);
+            return null;
+        }
+
+    }
 }

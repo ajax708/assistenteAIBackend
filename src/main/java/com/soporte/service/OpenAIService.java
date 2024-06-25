@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 public class OpenAIService {
     private final WebClient webClient;
 
+
     @Value("${openai.api.key}")
     private static String apiKey ="";
     private static final String API_KEY = "";
