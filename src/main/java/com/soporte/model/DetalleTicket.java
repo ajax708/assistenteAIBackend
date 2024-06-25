@@ -15,7 +15,5 @@ public class DetalleTicket {
     @ManyToOne
     @JoinColumn(name = "agente_id")
     private Agente responsable;
-    @ManyToOne
-    @JoinColumn(name = "ticket_id")
-    private Ticket ticket;
+    private Integer ticketId;
 }

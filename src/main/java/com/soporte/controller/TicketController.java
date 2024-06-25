@@ -23,7 +23,7 @@ public class TicketController {
     private final ClientCorreo clientCorreo;
 
 
-    @PostMapping(consumes = "application/json;charset=UTF-8",produces = "application/json;charset=UTF-8")
+    @PostMapping(path ="save",consumes = "application/json;charset=UTF-8",produces = "application/json;charset=UTF-8")
     public ResponseEntity<TicketDto> save(@RequestBody TicketDto dto)throws Exception{
         String session= UUID.randomUUID().toString();
         LOGGER.log(Level.INFO,"[{0}] request:{1}",new Object[]{session,dto});
@@ -41,8 +41,8 @@ public class TicketController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @GetMapping(consumes = "application/json;charset=UTF-8",produces = "application/json;charset=UTF-8")
-    public ResponseEntity<TicketDto> findById(@RequestBody Integer id)throws Exception{
+    @PostMapping(consumes = "application/json;charset=UTF-8",produces = "application/json;charset=UTF-8")
+    public ResponseEntity<TicketDto> findById(@RequestBody  Integer id)throws Exception{
         String session= UUID.randomUUID().toString();
         LOGGER.log(Level.INFO,"[{0}] findById:{1}",new Object[]{session,id});
         TicketDto dto=service.readById(session,id);

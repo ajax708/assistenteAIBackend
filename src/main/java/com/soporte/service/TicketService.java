@@ -71,7 +71,7 @@ public class TicketService {
             detalleTicket.setDescripcion(contenido.substring(0,250));
             detalleTicket.setEstado("ABIERTO");
             detalleTicket.setResponsable(a);
-            detalleTicket.setTicket(ticket);
+            //detalleTicket.setTicket(ticket);
             detalleTicketRepo.save(detalleTicket);
             DetalleTicketDto detalle=mapper.map(detalleTicket,DetalleTicketDto.class);
             return detalle;

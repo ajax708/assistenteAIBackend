@@ -21,6 +21,7 @@ public class Ticket {
     @JoinColumn(name = "soporte_id")
     private Soporte soporte;
     @OneToMany
+    @JoinColumn(name = "ticketId")
     private List<DetalleTicket> detalleTicket;
     private String estado;
     private String asunto;
