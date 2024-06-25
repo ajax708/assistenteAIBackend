@@ -1,5 +1,6 @@
 package com.soporte.controller;
 
+import com.soporte.clientecorreo.ClientCorreo;
 import com.soporte.dto.TicketDto;
 import com.soporte.service.TicketService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,8 @@ public class TicketController {
 
     private static final Logger LOGGER=Logger.getLogger(TicketController.class.getName());
     private final TicketService service;
+    private final ClientCorreo clientCorreo;
+
 
     @PostMapping(consumes = "application/json;charset=UTF-8",produces = "application/json;charset=UTF-8")
     public ResponseEntity<TicketDto> save(@RequestBody TicketDto dto)throws Exception{
@@ -55,5 +58,14 @@ public class TicketController {
         LOGGER.log(Level.INFO,"[{0}]all:{1}",new Object[]{session,dtoList});
         return new ResponseEntity<>(dtoList, HttpStatus.OK);
     }
+    @GetMapping(path ="test",produces = "application/json;charset=UTF-8")
+    public ResponseEntity<TicketDto> test(){
+        String session= UUID.randomUUID().toString();
+        LOGGER.log(Level.INFO,"[{0}]save all:{1}",new Object[]{session});
+        TicketDto dto=clientCorreo.testTicket();
+        LOGGER.log(Level.INFO,"[{0}]all:{1}",new Object[]{session,dto});
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
 
 }

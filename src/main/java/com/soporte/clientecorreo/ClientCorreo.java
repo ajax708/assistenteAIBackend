@@ -8,6 +8,8 @@ import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +28,7 @@ public class ClientCorreo {
     private final ProductoService productoService;
     private final OpenAIService openAIService;
     private final TicketService ticketService;
+
 
 
 
@@ -89,9 +92,11 @@ public class ClientCorreo {
                         }
                         if(soporteDto.getEstado()){
                             TicketDto ticketDto =this.createTicket(empleadoDto,soporteDto,subject);
+                            DetalleTicketDto detalleIn=ticketService.crearDetalleTicket(ticketDto,content.toString());
                             respuesta.set(openAIService.chatGptIa(content.toString()));
                             String correoRespuesta=respuesta.get();
                             System.out.println(correoRespuesta);
+                            DetalleTicketDto detalleOut=ticketService.crearDetalleTicket(ticketDto,correoRespuesta);
                             emailService.sendEmail(senderEmail,subject,correoRespuesta);
 
                         }
@@ -133,50 +138,7 @@ public class ClientCorreo {
         }
     }
 
-    /*
-    public void sendEmail(String to, String subject, String content) {
-        Properties prop = new Properties();
-        prop.put("mail.smtp.host", "smtp.gmail.com");
-        prop.put("mail.smtp.port", "587");
-        prop.put("mail.smtp.auth", "true");
-        prop.put("mail.smtp.starttls.enable", "true"); //TLS
 
-        Session session = Session.getInstance(prop,
-                new jakarta.mail.Authenticator() {
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(username, password);
-                    }
-                });
-
-        try {
-
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress("from-email@gmail.com"));
-            message.setRecipients(
-                    Message.RecipientType.TO,
-                    InternetAddress.parse(to)
-            );
-            message.setSubject(subject);
-            message.setText(content);
-
-            Transport.send(message);
-
-            System.out.println("Done");
-
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
-    }
-*/
-   /* public void sendSimpleMessage(String to, String subject, String text) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("luisbryancuevaparada@gmail.com");
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(text);
-        emailSender.send(message);
-    }
-*/
     private String convertMultipartToString(Multipart multipart) throws MessagingException, IOException {
         StringBuilder result = new StringBuilder();
         int count = multipart.getCount();
@@ -212,4 +174,41 @@ public class ClientCorreo {
         }
 
     }
+/*
+    private DetalleTicketDto crearDetalleTicket(TicketDto t,String contenido){
+        try{
+            AgenteDto a=new AgenteDto();
+            a.setId(1);
+            DetalleTicketDto detalleTicketDto=new DetalleTicketDto();
+            detalleTicketDto.setAsunto(t.getAsunto());
+            detalleTicketDto.setDescripcion(contenido);
+            detalleTicketDto.setEstado("ABIERTO");
+            detalleTicketDto.setResponsable(a);
+            detalleTicketDto.setTicket(t);
+            return detalleTicketDto;
+        }catch (Exception e){
+            System.out.println(e);
+            return null;
+        }
+
+    }
+    */
+    public TicketDto testTicket(){
+        try{
+            EmpleadoDto e=new EmpleadoDto();
+            e.setId(1);
+            SoporteDto s=new SoporteDto();
+            s.setId(1);
+            AgenteDto a=new AgenteDto();
+            a.setId(1);
+            String asunto="test1";
+            TicketDto t=this.createTicket(e,s,asunto);
+            return t;
+        }catch (Exception e){
+            System.out.println(e);
+            return null;
+        }
+
+    }
+
 }
